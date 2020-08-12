@@ -29,7 +29,6 @@ public class BaseEntity {
     private Long id;
 
     @JsonView(Views.Message.class)
-//    @CreatedDate
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created")
@@ -37,7 +36,6 @@ public class BaseEntity {
     private Date created;
 
     @JsonView(Views.Message.class)
-//    @LastModifiedDate
     @UpdateTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "updated")
