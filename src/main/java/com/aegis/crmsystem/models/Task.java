@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,15 +17,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Task extends BaseEntity{
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.Message.class)
-    @ApiModelProperty(notes = SwaggerConst.Tasks.Model.ID)
-    private Long id;
 
     @JsonView(Views.Message.class)
     @ApiModelProperty(notes = SwaggerConst.Tasks.Model.TITLE)

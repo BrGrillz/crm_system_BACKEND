@@ -1,11 +1,12 @@
 package com.aegis.crmsystem.models;
 
+import com.aegis.crmsystem.domain.Views;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,20 +16,21 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper=true)
 @AllArgsConstructor
 public class User extends BaseEntity implements Serializable{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
+    @JsonView(Views.Message.class)
     @Column(name = "first_name")
     private String firstName;
 
+    @JsonView(Views.Message.class)
     @Column(name = "last_name")
     private String lastName;
 
+    @JsonView(Views.Message.class)
     @Column(name = "email")
     private String email;
 
@@ -45,12 +47,15 @@ public class User extends BaseEntity implements Serializable{
 //    @Enumerated(EnumType.STRING)
 //    private Set<UserRole> roles;
 
+    @JsonView(Views.Message.class)
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
     private List<Role> roles;
 
+    @UpdateTimestamp
+    @JsonView(Views.Message.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "last_visit")
     private LocalDateTime lastVisit;
