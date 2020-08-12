@@ -1,0 +1,66 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.2.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+apply plugin: 'idea'
+
+group = 'com.aegis'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '14'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.postgresql:postgresql')
+	compile('javax.xml.bind:jaxb-api')
+
+	//Lombok
+	compileOnly 'org.projectlombok:lombok:1.18.12'
+	annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+	testCompileOnly 'org.projectlombok:lombok:1.18.12'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+	//Swagger
+	compile group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
+	compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+
+	//Security
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.3.2.RELEASE'
+
+	//Liquibase
+//	runtime "org.liquibase:liquibase-core"
+//	compile group: 'org.yaml', name: 'snakeyaml', version: '1.8'
+
+	//Flyway
+	implementation 'org.flywaydb:flyway-core'
+	compile "org.springframework:spring-jdbc"
+
+	//JWT
+	compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+}
+
+
+
+test {
+	useJUnitPlatform()
+}
+
