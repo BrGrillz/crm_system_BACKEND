@@ -1,18 +1,18 @@
 package com.aegis.crmsystem.models;
 
-import com.aegis.crmsystem.domain.Views;
 import com.aegis.crmsystem.constants.SwaggerConst;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.aegis.crmsystem.domain.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table

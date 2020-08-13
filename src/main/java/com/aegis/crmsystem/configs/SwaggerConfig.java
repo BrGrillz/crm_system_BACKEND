@@ -74,7 +74,8 @@ public class SwaggerConfig {
     private SecurityContext securityContext() {
         return SecurityContext.builder()
                 .securityReferences(defaultAuth())
-                .forPaths(PathSelectors.regex("/api/v1/tasks.*|/api/v1/admin.*"))
+                .forPaths(PathSelectors.regex("/api/v1/tasks.*|/api/v1/admin.*|/api/v1/upload.*"))
+
                 .build();
     }
 
