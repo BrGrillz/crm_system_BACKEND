@@ -36,4 +36,17 @@ public class ApiExceptionHandler {
 
         return new ResponseEntity<>(apiException, status);
     }
+
+    @ExceptionHandler(value = {ApiRequestExceptionFileOversize.class})
+    public ResponseEntity<Object> handlerApiRequestExceptionFileOversize(ApiRequestExceptionFileOversize error){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiException apiException = new ApiException(
+                error.getMessage(),
+                status,
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+
+        return new ResponseEntity<>(apiException, status);
+    }
 }
