@@ -8,7 +8,8 @@ apply plugin: 'idea'
 
 group = 'com.aegis'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '14'
+sourceCompatibility = "14"
+
 
 configurations {
 	compileOnly {
@@ -56,6 +57,10 @@ dependencies {
 
 	//JWT
 	compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+
+	//Docker
+	compile group: 'com.spotify', name: 'dockerfile-maven-plugin', version: '1.4.13'
+
 }
 
 
@@ -63,4 +68,3 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
-
