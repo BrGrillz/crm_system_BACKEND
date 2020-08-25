@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div class="jumbotron">
+        <h1 class="display-4">Добро пожалоть <span th:text="${firstName}"></span> в aegis crm system</h1>
+        <p class="lead">Ваша авторизация прошла успешно и вся информация для входа расположена ниже</p>
+        <hr class="my-4">
+        <p><strong>Login/Email:</strong> <span th:text="${email}"></span></p>
+        <p><strong>Password</strong> <span th:text="${password}"></span></p>
+        <a class="btn btn-primary btn-lg" href="#" role="button">Войти в систему</a>
+    </div>
+</body>
+</html>

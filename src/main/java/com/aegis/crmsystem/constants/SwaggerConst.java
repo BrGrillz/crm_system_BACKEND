@@ -18,12 +18,14 @@ public class SwaggerConst {
     }
 
     public static final class Tasks{
-        public static final String API_TITLE = "ЗАДАЧИ";
+        public static final String API_TITLE = "Задачи";
         public static final String GET_ALL_TASKS = "Получение списка задач";
+        public static final String GET_ALL_TASK_STATUS = "Получение списка статусов";
         public static final String GET_TASK_BY_ID = "Получить задачу";
         public static final String CREATE_TASK = "Создать задачу";
         public static final String UPDATE_TASK = "Обновить задачу";
         public static final String DELETE_TASK = "Удалить задачу";
+        public static final String CREATE_COMMENT = "Создать комментарий";
 
         public static final class Model{
             public static final String ID = "ID задачи";
@@ -35,16 +37,23 @@ public class SwaggerConst {
     }
 
     public static final class Auth{
-        public static final String API_TITLE = "АВТОРИЗАЦИЯ";
+        public static final String API_TITLE = "Авторизация";
         public static final String LOGIN = "Авторизация пользователя";
         public static final String REFRESH_TOKEN = "Получить новые токены по refresh token";
         public static final String VERIFY_TOKEN = "Проверка валидности access token";
     }
 
-    public static final class Admin{
-        public static final String API_TITLE = "АДМИНИСТРИРОВАНИЕ";
+    public static final class User{
+        public static final String API_TITLE = "Пользователи";
         public static final String ALL_ROLE = "Получить список всех ролей";
         public static final String ALL_USERS_BY_ROLE = "Получить список пользователей связанных с этой ролью";
         public static final String ALL_USERS = "Получить список всех пользователей";
+    }
+
+    public static final class Admin{
+        public static final String API_TITLE = "Администрирование";
+        public static final String CREATE_USER = "Создать пользователя";
+        public static final String DELETE_USER = "Удалить пользователя";
+        public static final String UPDATE_USER = "Изменить пользователя";
     }
 }

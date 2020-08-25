@@ -23,22 +23,22 @@ import java.util.Date;
 @NoArgsConstructor
 public class BaseEntity {
 
+    @JsonView({Views.Message.class})
     @Id
-    @JsonView(Views.Message.class)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @JsonView(Views.Message.class)
+    @JsonView({Views.Message.class})
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    @Column(name = "created")
+    @Column(name = "created_at")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Date created;
 
-    @JsonView(Views.Message.class)
+    @JsonView({Views.Message.class})
     @UpdateTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    @Column(name = "updated")
+    @Column(name = "updated_at")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Date updated;
 }

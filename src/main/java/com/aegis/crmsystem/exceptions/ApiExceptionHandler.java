@@ -36,4 +36,30 @@ public class ApiExceptionHandler {
 
         return new ResponseEntity<>(apiException, status);
     }
+
+    @ExceptionHandler(value = {ApiRequestExceptionBadRequest.class})
+    public ResponseEntity<Object> handlerApiRequestExceptionBadRequest(ApiRequestExceptionBadRequest error){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiException apiException = new ApiException(
+                error.getMessage(),
+                status,
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+
+        return new ResponseEntity<>(apiException, status);
+    }
+
+    @ExceptionHandler(value = {ApiRequestExceptionAccessDenied.class})
+    public ResponseEntity<Object> handlerApiRequestExceptionAccessDenied(ApiRequestExceptionAccessDenied error){
+        HttpStatus status = HttpStatus.FORBIDDEN;
+
+        ApiException apiException = new ApiException(
+                error.getMessage(),
+                status,
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+
+        return new ResponseEntity<>(apiException, status);
+    }
 }

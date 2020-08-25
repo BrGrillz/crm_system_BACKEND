@@ -1,19 +1,14 @@
 package com.aegis.crmsystem.security.jwt;
 import com.aegis.crmsystem.models.User;
 import com.aegis.crmsystem.models.Role;
+import com.aegis.crmsystem.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-/**
- * Implementation of Factory Method for class {@link JwtUser}.
- *
- * @author Eugene Suleimanov
- * @version 1.0
- */
 
 public final class JwtUserFactory {
 
@@ -28,7 +23,8 @@ public final class JwtUserFactory {
                 user.getEmail(),
                 user.getPassword(),
                 mapToGrantedAuthorities(new ArrayList<>(user.getRoles())),
-                user.getUpdated()
+                user.getUpdated(),
+                user
         );
     }
 

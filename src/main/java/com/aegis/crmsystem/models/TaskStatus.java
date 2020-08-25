@@ -13,22 +13,17 @@ import javax.persistence.*;
 @Entity
 @Table
 @Data
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-public class Comment extends BaseEntity{
+public class TaskStatus {
+    @JsonView({Views.Message.class})
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     @JsonView({Views.Message.class})
-    @JoinColumn(name = "text", nullable = false)
-    private String text;
+    @Column(name = "status")
+    private String status;
 
     @JsonView({Views.Message.class})
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private User author;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "task_id")
-    private Task task;
+    @Column(name = "name")
+    private String name;
 }

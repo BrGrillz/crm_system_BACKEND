@@ -1,17 +1,18 @@
 package com.aegis.crmsystem.models;
 
 import com.aegis.crmsystem.domain.Views;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -22,48 +23,45 @@ import java.util.List;
 @AllArgsConstructor
 public class User extends BaseEntity implements Serializable{
 
-    @JsonView(Views.Message.class)
+    @JsonView({Views.Message.class})
     @Column(name = "first_name")
     private String firstName;
 
-    @JsonView(Views.Message.class)
+    @JsonView({Views.Message.class})
     @Column(name = "last_name")
     private String lastName;
 
-    @JsonView(Views.Message.class)
+    @JsonView({Views.Message.class})
     @Column(name = "email")
     private String email;
 
     @JsonIgnore
-    @Column(name = "password")
+    @Column(name = "password", unique = true)
     private String password;
-
-//    @ManyToOne
-//    @JoinColumn(name = "user_role_id", nullable = false)
-//    private UserRole user_role_id;
 
 //    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
 //    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
 //    @Enumerated(EnumType.STRING)
 //    private Set<UserRole> roles;
 
-    @JsonView(Views.Message.class)
-    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonView({Views.Message.class})
+    @JsonManagedReference
+    @ManyToMany
     @JoinTable(name = "user_roles",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Role> roles;
 
-    @UpdateTimestamp
-    @JsonView(Views.Message.class)
+    @JsonView({Views.Message.class})
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "last_visit")
     private LocalDateTime lastVisit;
 
-//    @OneToMany(cascade = CascadeType.ALL,
-//            fetch = FetchType.LAZY,
-//            mappedBy = "user")
-//    private Set<Task> task = new HashSet<>();
+    @JsonView(Views.Message.class)
+    @ManyToMany
+    @JsonBackReference
+    private Set<Task> tasks;
 
 //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 //    @JsonView(Views.FullMessage.class)

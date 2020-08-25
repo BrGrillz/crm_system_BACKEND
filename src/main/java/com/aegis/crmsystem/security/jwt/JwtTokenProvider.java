@@ -1,9 +1,10 @@
 package com.aegis.crmsystem.security.jwt;
 
-import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
-import com.aegis.crmsystem.models.User;
+import com.aegis.crmsystem.exceptions.ApiRequestExceptionBadRequest;
 import com.aegis.crmsystem.models.Role;
+import com.aegis.crmsystem.models.User;
 import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,11 +14,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -32,7 +36,6 @@ public class JwtTokenProvider {
 
     @Value("${jwt.token.refresh_token.expired}")
     private long validityRefreshTokenInMilliseconds;
-
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -74,9 +77,15 @@ public class JwtTokenProvider {
 
         return response;
     }
-
+    @Transactional(propagation= Propagation.REQUIRED)
     public Authentication getAuthentication(String token) {
+
+        log.info("+++++___________________________________getUserEmailFromAccessToken(token)______________________________+++++ {}", getUserEmailFromAccessToken(token));
+
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUserEmailFromAccessToken(token));
+
+        log.info("+++++___________________________________userDetails_____1_________________________+++++ {}", userDetails);
+
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
@@ -90,10 +99,14 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
+
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7, bearerToken.length());
         }
         return null;
+//        else {
+//            throw new ApiRequestExceptionUnauthorized("Вы не авторизованны");
+//        }
     }
 
     public boolean validateAccessToken(String token) {
@@ -106,7 +119,7 @@ public class JwtTokenProvider {
 
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiRequestExceptionUnauthorized("access token is invalid");
+            throw new ApiRequestExceptionBadRequest("access token is invalid1");
         }
     }
 
@@ -120,7 +133,7 @@ public class JwtTokenProvider {
 
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiRequestExceptionUnauthorized("refresh token is invalid");
+            throw new ApiRequestExceptionBadRequest("access token is invalid1");
         }
     }
 
