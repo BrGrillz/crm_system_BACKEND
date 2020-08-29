@@ -1,9 +1,12 @@
-package com.aegis.crmsystem.controllers.v1;
+package com.aegis.crmsystem.controllers.v1.http;
 
+import com.aegis.crmsystem.Gggg;
 import com.aegis.crmsystem.constants.SwaggerConst;
 import com.aegis.crmsystem.dto.AuthenticationRequestDto;
 import com.aegis.crmsystem.dto.request.AccessTokenDto;
 import com.aegis.crmsystem.dto.request.RefreshTokenDto;
+import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
+import com.aegis.crmsystem.models.User;
 import com.aegis.crmsystem.security.jwt.JwtTokenProvider;
 import com.aegis.crmsystem.servies.AuthenticationService;
 import io.swagger.annotations.Api;
@@ -11,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -42,5 +46,10 @@ public class AuthController {
     @ApiOperation(value = SwaggerConst.Auth.VERIFY_TOKEN)
     public ResponseEntity checkAccessToken(@RequestBody AccessTokenDto accessTokenDto) {
         return ResponseEntity.ok(jwtTokenProvider.validateAccessToken(accessTokenDto.getToken()));
+    }
+
+    @GetMapping("user")
+    public User getCurrentUser(){
+        return Gggg.user.getUser();
     }
 }

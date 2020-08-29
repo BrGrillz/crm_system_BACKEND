@@ -14,6 +14,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Date;
 
 @MappedSuperclass
@@ -25,7 +26,7 @@ public class BaseEntity {
 
     @JsonView({Views.Message.class})
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JsonView({Views.Message.class})
@@ -33,12 +34,12 @@ public class BaseEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Date created;
+    private Timestamp created;
 
     @JsonView({Views.Message.class})
     @UpdateTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "updated_at")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Date updated;
+    private Timestamp updated;
 }

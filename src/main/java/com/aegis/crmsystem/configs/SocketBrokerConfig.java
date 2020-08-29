@@ -4,6 +4,7 @@ import com.aegis.crmsystem.Gggg;
 import com.aegis.crmsystem.dto.WebSocketErrorMessageDto;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
 import com.aegis.crmsystem.models.User;
+import com.aegis.crmsystem.repositories.UserRepository;
 import com.aegis.crmsystem.security.jwt.JwtTokenProvider;
 import com.aegis.crmsystem.security.jwt.JwtUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,6 +35,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Configuration
@@ -43,6 +45,9 @@ class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     @Qualifier("clientOutboundChannel")
@@ -76,8 +81,13 @@ class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
                     final Authentication auth = (Authentication) accessor.getUser();
 
                     if(auth != null){
-                        final JwtUser user = (JwtUser) auth.getPrincipal();
-                        Gggg.user = user;
+                        final JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+                        Gggg.user = jwtUser;
+
+                        User user = jwtUser.getUser();
+                        user.setLastVisit(LocalDateTime.now());
+                        
+                        userRepository.save(user);
                         SecurityContextHolder.getContext().setAuthentication(auth);
                     }
                 }

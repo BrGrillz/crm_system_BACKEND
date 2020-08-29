@@ -7,8 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table
@@ -23,12 +26,17 @@ public class Comment extends BaseEntity{
     private String text;
 
     @JsonView({Views.Message.class})
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    @LazyCollection(LazyCollectionOption.FALSE)
     private User author;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "task_id")
     private Task task;
+
+    @OneToMany
+    @JoinColumn(name = "file")
+    private List<File> file;
 }

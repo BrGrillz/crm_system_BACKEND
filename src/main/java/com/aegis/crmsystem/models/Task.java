@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Date;
@@ -36,7 +37,7 @@ public class Task extends BaseEntity{
 
     @JsonView({Views.Message.class})
     @ApiModelProperty(notes = SwaggerConst.Tasks.Model.TEXT)
-    @Column(name = "delete_status")
+    @Column(name = "delete_status", columnDefinition = "boolean default false")
     private Boolean deleteStatus;
 
     @JsonView({Views.Message.class})
@@ -48,6 +49,7 @@ public class Task extends BaseEntity{
     @JsonView({Views.FullMessage.class})
     @OneToMany(mappedBy = "task")
     @ApiModelProperty(notes = SwaggerConst.Tasks.Model.TEXT)
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Comment> comments;
 
     @JsonView({Views.Message.class})
@@ -71,8 +73,8 @@ public class Task extends BaseEntity{
     @JsonManagedReference
     @ApiModelProperty(notes = SwaggerConst.Tasks.Model.TEXT)
     @ManyToMany
-    @JoinTable(name = "observers_users",
-            joinColumns = {@JoinColumn(name = "observers_id", referencedColumnName = "id")},
+    @JoinTable(name = "task_users",
+            joinColumns = {@JoinColumn(name = "task_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "users_id", referencedColumnName = "id")})
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<User> observers;

@@ -3,8 +3,10 @@ package com.aegis.crmsystem.security.jwt;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionNotFound;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,21 +20,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
 public class JwtTokenFilter extends GenericFilterBean {
 
-    @Autowired
     private final JwtTokenProvider jwtTokenProvider;
-
-    private final List<String> allowedOrigins = Arrays.asList("http://localhost:8080");
+    private final String frontendUrl;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
+
+        final List<String> allowedOrigins = Collections.singletonList(frontendUrl);
 
         // Access-Control-Allow-Origin
         String origin = request.getHeader("Origin");
@@ -52,7 +55,6 @@ public class JwtTokenFilter extends GenericFilterBean {
         response.setHeader("Access-Control-Allow-Headers",
                 "Origin, X-Requested-With, Content-Type, Accept, " + "X-CSRF-TOKEN");
 
-//        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH");
 //        response.setHeader("Access-Control-Max-Age", "3600");
 //        response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -70,6 +72,9 @@ public class JwtTokenFilter extends GenericFilterBean {
                 }
             }
         } catch (RuntimeException e) {
+
+            log.debug("=================================++++++++++++++jwtTokenProvider++++++++++++++================================{}", jwtTokenProvider);
+
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "access token is invalid");
             return;
         }

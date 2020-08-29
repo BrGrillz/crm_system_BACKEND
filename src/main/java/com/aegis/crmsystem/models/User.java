@@ -58,10 +58,11 @@ public class User extends BaseEntity implements Serializable{
     @Column(name = "last_visit")
     private LocalDateTime lastVisit;
 
-    @JsonView(Views.Message.class)
-    @ManyToMany
-    @JsonBackReference
-    private Set<Task> tasks;
+//    @JsonView(Views.Message.class)
+//    @ManyToMany(mappedBy = "observers")
+//    @JsonBackReference
+//    @LazyCollection(LazyCollectionOption.FALSE)
+//    private List<Task> tasks;
 
 //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 //    @JsonView(Views.FullMessage.class)

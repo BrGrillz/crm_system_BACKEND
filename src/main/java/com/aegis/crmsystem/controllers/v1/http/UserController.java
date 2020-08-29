@@ -1,4 +1,4 @@
-package com.aegis.crmsystem.controllers.v1;
+package com.aegis.crmsystem.controllers.v1.http;
 
 
 import com.aegis.crmsystem.constants.SwaggerConst;
@@ -43,8 +43,6 @@ public class UserController {
     @ApiOperation(value = SwaggerConst.User.ALL_USERS)
 
     @GetMapping
-    @MessageMapping("/getAllUser")
-    @SendTo("/user/getAll")
     public List<User> getAllUsers() {
         return userService.findAll();
     }

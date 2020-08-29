@@ -2,9 +2,7 @@ package com.aegis.crmsystem.servies;
 
 import com.aegis.crmsystem.constants.SwaggerConst;
 import com.aegis.crmsystem.dto.request.CommentDto;
-import com.aegis.crmsystem.dto.request.task.CreateTaskDto;
-import com.aegis.crmsystem.dto.request.task.DetailsTaskDto;
-import com.aegis.crmsystem.dto.request.task.FilterGetAllTaskDto;
+import com.aegis.crmsystem.dto.request.task.*;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionAccessDenied;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionNotFound;
 import com.aegis.crmsystem.models.Comment;
@@ -20,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -57,15 +56,15 @@ public class TaskService {
                 .title(createTaskDto.getTitle())
                 .description(createTaskDto.getDescription())
                 .dueDate(createTaskDto.getDueDate())
-                .deleteStatus(false)
                 .status(taskStatus)
                 .author(user)
+                .deleteStatus(false)
                 .responsible(responsibleUser)
                 .observers(observersUsers)
                 .build());
     }
 
-    public Task getById(
+    public Task getOne(
             @NotNull DetailsTaskDto detailsTaskDto,
             @NotNull User user
             ) {
@@ -88,6 +87,9 @@ public class TaskService {
     public List<Task> findAll(User user, FilterGetAllTaskDto filterGetAllTaskDto) {
         log.info(SwaggerConst.Tasks.GET_ALL_TASKS);
 
+        List<User> observers = new ArrayList<>();
+        observers.add(user);
+
         if(filterGetAllTaskDto.getAuthor() != null){
             return tasksRepository.findWhereUserAuthor(user);
         }
@@ -97,7 +99,12 @@ public class TaskService {
         }
 
         if(filterGetAllTaskDto.getObservers() != null){
+            log.debug("==================observers======================= {}", observers);
             return tasksRepository.findWhereUserObserver(user);
+        }
+
+        if(filterGetAllTaskDto.getDeleted() != null){
+            return tasksRepository.findDeleted();
         }
 
         return tasksRepository.findAllByUser(user);
@@ -108,15 +115,12 @@ public class TaskService {
     }
 
     public Task put(
-            @NotNull Task task,
-            @NotNull String title,
-            @NotNull String text,
-            @NotNull Long responsible,
-            List<Long> observers,
-            @NotNull Date dueDate,
+            @NotNull UpdateTaskDto updateTaskDto,
             @NotNull User user
             ) {
         log.info(SwaggerConst.Tasks.UPDATE_TASK);
+
+        final Task task = tasksRepository.findById(updateTaskDto.getId()).get();
 
         final Long userId = user.getId();
         final Long authorId = task.getAuthor().getId();
@@ -126,70 +130,89 @@ public class TaskService {
             throw new ApiRequestExceptionAccessDenied("У вас нет доступа для выполнения этой операции");
         }
 
-        User userResponsible = userRepository.findById(responsible).get();
+        final List<User> userObservers = userRepository.findAllById(updateTaskDto.getObservers());
+        final User userResponsible = userRepository.findById(updateTaskDto.getResponsible()).get();
+        final TaskStatus status = taskStatusRepository.findById(updateTaskDto.getStatus()).get();
 
-        task.setTitle(title);
-        task.setDescription(text);
+
+        log.debug("===========updateTaskDto.getDueDate()================== {}", updateTaskDto.getDueDate());
+
+        task.setTitle(updateTaskDto.getTitle());
+        task.setDescription(updateTaskDto.getDescription());
         task.setResponsible(userResponsible);
-        task.setDueDate(dueDate);
+        task.setObservers(userObservers);
+        task.setDueDate(updateTaskDto.getDueDate());
+        task.setStatus(status);
 
         return tasksRepository.save(task);
     }
 
     public Task patch(
-            @NotNull Task task,
-            String title,
-            String text,
-            Long responsible,
-            List<Long> observers,
-            Date dueDate,
+            @NotNull PatchTaskDto patchTaskDto,
             @NotNull User user
     ) {
         log.info(SwaggerConst.Tasks.UPDATE_TASK);
+
+        final Task task = tasksRepository.findById(patchTaskDto.getId()).get();
 
         final Long userId = user.getId();
         final Long authorId = task.getAuthor().getId();
         final Long responsibleId = task.getResponsible().getId();
 
-        if(!userId.equals(authorId) || !userId.equals(responsibleId)){
+        if(!userId.equals(authorId) && !userId.equals(responsibleId)){
             throw new ApiRequestExceptionAccessDenied("У вас нет доступа для выполнения этой операции");
         }
 
-        if(title != null){
-            task.setTitle(title);
+        if(patchTaskDto.getTitle() != null){
+            task.setTitle(patchTaskDto.getTitle());
         }
 
-        if(text != null){
-            task.setDescription(text);
+        if(patchTaskDto.getDescription() != null){
+            task.setDescription(patchTaskDto.getDescription());
         }
 
-        if(responsible != null){
-            User userResponsible = userRepository.findById(responsible).get();
+        if(patchTaskDto.getResponsible() != null){
+            final User userResponsible = userRepository.findById(patchTaskDto.getResponsible()).get();
+
             task.setResponsible(userResponsible);
         }
 
-//        if(!observers != null){
-//            task.setTitle(title);
-//        }
+        if(patchTaskDto.getObservers() != null){
+            final List<User> users = userRepository.findAllById(patchTaskDto.getObservers());
 
-        if(dueDate != null){
-            task.setDueDate(dueDate);
+            task.setObservers(users);
+        }
+
+        if(patchTaskDto.getDueDate() != null){
+            task.setDueDate(patchTaskDto.getDueDate());
+        }
+
+        if(patchTaskDto.getStatus() != null){
+            final TaskStatus status = taskStatusRepository.findById(patchTaskDto.getStatus()).get();
+
+            task.setStatus(status);
         }
 
         return tasksRepository.save(task);
     }
 
-    public void delete(@NotNull Task task) {
+    public Task delete(@NotNull DeleteTaskDto deleteTaskDto) {
         log.info(SwaggerConst.Tasks.DELETE_TASK);
 
-        tasksRepository.delete(task);
+        final Task task = tasksRepository.findById(deleteTaskDto.getId()).get();
+
+        task.setDeleteStatus(true);
+
+        tasksRepository.save(task);
+
+        return task;
     }
 
     public Comment makeComment(
             @NotNull CommentDto commentDto,
             @NotNull User user
     ) {
-        Task task = tasksRepository.findById(Long.valueOf(commentDto.getTaskId())).get();
+        Task task = tasksRepository.findById(commentDto.getTaskId()).get();
 
         return commentRepository.save(Comment.builder()
                 .text(commentDto.getText())

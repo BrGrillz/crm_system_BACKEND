@@ -47,7 +47,11 @@ public class AuthenticationService {
             throw new ApiRequestExceptionNotFound("User with email: " + email + " not found");
         }
 
+        log.debug("---------------------------------1----------------------------------------");
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, requestDto.getPassword()));
+
+        log.debug("---------------------------------2----------------------------------------");
 
         return jwtTokenProvider.createTokens(user);
     }

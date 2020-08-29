@@ -6,7 +6,7 @@ import lombok.NonNull;
 @Data
 public class CommentDto {
     @NonNull
-    private Integer taskId;
+    private Long taskId;
 
     @NonNull
     private String text;

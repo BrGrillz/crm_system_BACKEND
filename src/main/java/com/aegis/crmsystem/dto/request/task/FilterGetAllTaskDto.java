@@ -7,4 +7,5 @@ public class FilterGetAllTaskDto {
     private Boolean author;
     private Boolean responsible;
     private Boolean observers;
+    private Boolean deleted;
 }

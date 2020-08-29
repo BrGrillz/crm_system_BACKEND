@@ -13,10 +13,10 @@ public class CrmsystemApplication {
 	@Value("${spring.jpa.properties.hibernate.jdbc.time_zone}")
 	private String timezone;
 
-	@PostConstruct
-	void started() {
-		TimeZone.setDefault(TimeZone.getTimeZone(timezone));
-	}
+//	@PostConstruct
+//	void started() {
+//		TimeZone.setDefault(TimeZone.getTimeZone(timezone));
+//	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(CrmsystemApplication.class, args);

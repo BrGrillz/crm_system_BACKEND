@@ -56,6 +56,8 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(user.getEmail());
         claims.put("roles", getRoleNames(user.getRoles()));
 
+        log.debug("---------------------------------3----------------------------------------");
+
         Date now = new Date();
         Date validityForAccessToken = new Date(now.getTime() + validityAccessTokenInMilliseconds);
         Date validityForRefreshToken = new Date(now.getTime() + validityRefreshTokenInMilliseconds);
@@ -75,9 +77,11 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretRefreshToken)
                 .compact());
 
+        log.debug("---------------------------------4---------------------------------------- {}", response);
+
         return response;
     }
-    @Transactional(propagation= Propagation.REQUIRED)
+
     public Authentication getAuthentication(String token) {
 
         log.info("+++++___________________________________getUserEmailFromAccessToken(token)______________________________+++++ {}", getUserEmailFromAccessToken(token));
@@ -113,11 +117,7 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretAccessToken).parseClaimsJws(token);
 
-            if (claims.getBody().getExpiration().before(new Date())) {
-                return false;
-            }
-
-            return true;
+            return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             throw new ApiRequestExceptionBadRequest("access token is invalid1");
         }
@@ -127,11 +127,7 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretRefreshToken).parseClaimsJws(token);
 
-            if (claims.getBody().getExpiration().before(new Date())) {
-                return false;
-            }
-
-            return true;
+            return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             throw new ApiRequestExceptionBadRequest("access token is invalid1");
         }

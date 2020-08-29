@@ -1,4 +1,4 @@
-package com.aegis.crmsystem.controllers.v1;
+package com.aegis.crmsystem.controllers.v1.http;
 
 
 import com.aegis.crmsystem.Gggg;
@@ -14,18 +14,12 @@ import com.aegis.crmsystem.models.TaskStatus;
 import com.aegis.crmsystem.security.jwt.JwtUser;
 import com.aegis.crmsystem.servies.TaskService;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.sun.istack.Nullable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -40,11 +34,9 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    @MessageMapping("/getAllTask")
-    @SendTo("/task/getAll")
     @JsonView({Views.Message.class})
     @ApiOperation(value = SwaggerConst.Tasks.GET_ALL_TASKS)
-    public List<Task> getAll(@Nullable FilterGetAllTaskDto filterGetAllTaskDto) {
+    public List<Task> getAll(@RequestBody(required = false) FilterGetAllTaskDto filterGetAllTaskDto) {
         if(filterGetAllTaskDto == null){
             filterGetAllTaskDto = new FilterGetAllTaskDto();
         }
@@ -52,26 +44,16 @@ public class TaskController {
         return taskService.findAll(Gggg.user.getUser(), filterGetAllTaskDto);
     }
 
-    @MessageMapping("/getAllStatus")
-    @SendTo("/status/getAll")
     @JsonView({Views.Message.class})
     @ApiOperation(value = SwaggerConst.Tasks.GET_ALL_TASK_STATUS)
     public List<TaskStatus> getAllStatus() {
         return taskService.findAllStatus();
     }
 
-    @MessageMapping("/detailsTask")
-    @SendTo("/task/getOne")
     @JsonView({Views.FullMessage.class})
     @ApiOperation(value = SwaggerConst.Tasks.GET_TASK_BY_ID)
-    public Task getOne(
-            @RequestBody DetailsTaskDto detailsTaskDto
-            ) {
-        return taskService.getById(detailsTaskDto, Gggg.user.getUser());
-    }
+    public void getOne(@RequestBody DetailsTaskDto detailsTaskDto) { }
 
-    @MessageMapping("/createTask")
-    @SendTo("/task/create")
     @JsonView({Views.Message.class})
     @PostMapping
     @ApiOperation(value = SwaggerConst.Tasks.CREATE_TASK)
@@ -87,12 +69,10 @@ public class TaskController {
      * @param responsible Ответственный за задачу
      * @param observers Наблюдатели за задачей
      */
-    @MessageMapping("/updateTask")
-    @SendTo("/task/update")
     @JsonView({Views.Message.class})
     @PutMapping("{id}")
     @ApiOperation(value = SwaggerConst.Tasks.UPDATE_TASK)
-    public Task update(
+    public void update(
             @AuthenticationPrincipal JwtUser jwtUser,
             @PathVariable("id") Task task,
             @RequestParam(value = "title") String title,
@@ -100,9 +80,7 @@ public class TaskController {
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @RequestParam("dueDate") Date dueDate,
             @RequestParam(value = "responsible_id") Long responsible,
             @RequestParam(value = "observers_ids", required = false) List<Long> observers
-    ) {
-        return taskService.put(task, title, text, responsible, observers, dueDate, jwtUser.getUser());
-    }
+    ) {}
 
     /**
      * @param jwtUser Текущий авторизованный пользователь
@@ -112,12 +90,10 @@ public class TaskController {
      * @param responsible Ответственный за задачу
      * @param observers Наблюдатели за задачей
      */
-    @MessageMapping("/patchTask")
-    @SendTo("/task/patch")
     @JsonView({Views.Message.class})
     @PatchMapping("{id}")
     @ApiOperation(value = SwaggerConst.Tasks.UPDATE_TASK)
-    public Task patch(
+    public void patch(
             @AuthenticationPrincipal JwtUser jwtUser,
             @PathVariable("id") Task task,
             @RequestParam(value = "title", required = false) String title,
@@ -125,21 +101,13 @@ public class TaskController {
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @RequestParam(value = "dueDate", required = false) Date dueDate,
             @RequestParam(value = "responsible_id", required = false) Long responsible,
             @RequestParam(value = "observers_ids", required = false) List<Long> observers
-            ) {
-        return taskService.patch(task, title, text, responsible, observers, dueDate, jwtUser.getUser());
-    }
+            ) {}
 
-    @MessageMapping("/deleteTask")
-    @SendTo("/task/delete")
     @JsonView({Views.Message.class})
     @DeleteMapping("{id}")
     @ApiOperation(value = SwaggerConst.Tasks.DELETE_TASK)
-    public void delete(@PathVariable("id") Task task) {
-        taskService.delete(task);
-    }
+    public void delete(@PathVariable("id") Task task) { }
 
-    @MessageMapping("/commentTask")
-    @SendTo("/task/makeComment")
     @JsonView({Views.Message.class})
     @PostMapping("comment")
     @ApiOperation(value = SwaggerConst.Tasks.CREATE_COMMENT)

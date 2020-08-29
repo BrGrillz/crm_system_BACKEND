@@ -1,0 +1,1 @@
+alter table if exists files add constraint FK_files_comment foreign key (file) references comment

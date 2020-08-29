@@ -38,7 +38,7 @@ public class Role {
     private String name;
 
     @JsonBackReference
-    @ManyToMany
+    @ManyToMany(mappedBy = "roles")
     private List<User> users;
 
     @Override

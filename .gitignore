@@ -35,5 +35,4 @@ out/
 .vscode/
 
 src/main/resources/data/
-src/main/resources/db/
 logs
