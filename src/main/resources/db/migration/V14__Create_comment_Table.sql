@@ -1,5 +1,5 @@
 create table comment (
-    id int8 not null,
+    id bigserial not null,
     text varchar(255),
     user_id int8 not null,
     task_id int8,

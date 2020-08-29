@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class TaskStatus {
     @JsonView({Views.Message.class})
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JsonView({Views.Message.class})

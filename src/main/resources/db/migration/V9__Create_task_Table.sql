@@ -1,5 +1,5 @@
 create table task (
-    id int8 not null,
+    id bigserial not null,
     title varchar(255),
     description varchar(2024),
     delete_status boolean default false,

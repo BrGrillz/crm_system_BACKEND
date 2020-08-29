@@ -12,7 +12,7 @@
 -- );
 
 create table users (
-    id int8 not null,
+    id bigserial not null,
     email varchar(255),
     password varchar(255),
     first_name varchar(255),

@@ -8,7 +8,11 @@ apply plugin: 'idea'
 
 group = 'com.aegis'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '14'
+
+compileJava {
+	targetCompatibility = 1.8
+	sourceCompatibility = 1.8
+}
 
 configurations {
 	compileOnly {
