@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.*;
@@ -19,6 +20,7 @@ import javax.persistence.Table;
 import java.util.Date;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table
 @Data
@@ -45,6 +47,11 @@ public class Task extends BaseEntity{
     @ApiModelProperty(notes = SwaggerConst.Tasks.Model.TEXT)
     @JoinColumn(name = "task_status_id")
     private TaskStatus status;
+
+    @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JoinColumn(name = "task_id")
+    private List<File> files;
 
     @JsonView({Views.FullMessage.class})
     @OneToMany(mappedBy = "task")

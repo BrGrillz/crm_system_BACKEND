@@ -5,7 +5,7 @@ import com.aegis.crmsystem.dto.request.users.DeleteUserDto;
 import com.aegis.crmsystem.dto.request.users.PatchUserDto;
 import com.aegis.crmsystem.dto.request.users.PutUserDto;
 import com.aegis.crmsystem.models.User;
-import com.aegis.crmsystem.servies.UserService;
+import com.aegis.crmsystem.servies.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -19,28 +19,28 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class WSAdminController {
     @Autowired
-    private UserService userService;
+    private UsersService userService;
 
     @MessageMapping("/createUser")
-    @SendTo("/user/create")
+    @SendTo("/usr/create")
     public User createUser(@Payload CreateUserDto createUserDto) {
         return userService.create(createUserDto);
     }
 
     @MessageMapping("/deleteUser")
-    @SendTo("/user/delete")
+    @SendTo("/usr/delete")
     public User deleteUser(@Payload DeleteUserDto deleteUserDto) {
         return userService.delete(deleteUserDto);
     }
 
     @MessageMapping("/putUser")
-    @SendTo("/user/update")
+    @SendTo("/usr/update")
     public User updateUser(@Payload PutUserDto patchUserDto) {
         return userService.put(patchUserDto);
     }
 
     @MessageMapping("/patchUser")
-    @SendTo("/user/update")
+    @SendTo("/usr/update")
     public User patchUser(@Payload PatchUserDto patchUserDto) {
         return userService.patch(patchUserDto);
     }

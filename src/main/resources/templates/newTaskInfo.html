@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="jumbotron">
+        <h1 class="display-4"><span th:text="${task.getTitle()}"></span></h1>
+        <p class="lead">Была создана новая задача, где вы <span th:text="${user.getFirstName()}"></span> являетесь её участником</p>
+        <hr class="my-4">
+        <p><strong>Описание задачи:</strong> <span th:text="${task.getDescription()}"></span></p>
+        <a class="btn btn-primary btn-lg" th:href="${taskUrl}" role="button">Ссылка на задачу</a>
+    </div>
+</body>
+</html>

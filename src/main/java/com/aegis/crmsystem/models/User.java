@@ -21,7 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper=true)
 @AllArgsConstructor
-public class User extends BaseEntity implements Serializable{
+public class User extends BaseEntity {
 
     @JsonView({Views.Message.class})
     @Column(name = "first_name")
@@ -39,6 +39,10 @@ public class User extends BaseEntity implements Serializable{
     @Column(name = "password", unique = true)
     private String password;
 
+    @ManyToOne
+    @JsonView({Views.Message.class})
+    @JoinColumn(name = "avatar")
+    private File avatar;
 //    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
 //    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
 //    @Enumerated(EnumType.STRING)

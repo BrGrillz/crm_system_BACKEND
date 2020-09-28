@@ -24,4 +24,6 @@ public class CreateTaskDto {
     private Long responsible;
 
     private List<Long> observers;
+
+    private List<Long> files;
 }

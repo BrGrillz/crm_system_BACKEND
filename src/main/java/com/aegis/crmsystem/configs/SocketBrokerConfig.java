@@ -1,15 +1,10 @@
 package com.aegis.crmsystem.configs;
 
-import com.aegis.crmsystem.Gggg;
-import com.aegis.crmsystem.dto.WebSocketErrorMessageDto;
-import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
+import com.aegis.crmsystem.Auth;
 import com.aegis.crmsystem.models.User;
 import com.aegis.crmsystem.repositories.UserRepository;
 import com.aegis.crmsystem.security.jwt.JwtTokenProvider;
 import com.aegis.crmsystem.security.jwt.JwtUser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -29,7 +23,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -55,7 +48,7 @@ class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/task", "/user", "/status");
+        config.enableSimpleBroker("/task", "/usr", "/status", "/user");
         config.setApplicationDestinationPrefixes("/app");
     }
 
@@ -82,7 +75,8 @@ class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
 
                     if(auth != null){
                         final JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-                        Gggg.user = jwtUser;
+                        Auth.jwtUser = jwtUser;
+                        Auth.user = jwtUser.getUser();
 
                         User user = jwtUser.getUser();
                         user.setLastVisit(LocalDateTime.now());
@@ -109,8 +103,10 @@ class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
                                 SecurityContextHolder.getContext().setAuthentication(auth);
 
                                 final Authentication res = SecurityContextHolder.getContext().getAuthentication();
-                                final JwtUser user = (JwtUser) res.getPrincipal();
-                                log.info("+++++___________________________________USER______________________________+++++ {}", user);
+                                final JwtUser jwtUser = (JwtUser) res.getPrincipal();
+                                Auth.jwtUser = jwtUser;
+                                Auth.user = jwtUser.getUser();
+                                log.info("+++++___________________________________USER______________________________+++++ {}", jwtUser);
                             }
                         } else {
                             sendStompError("401", accessor.getSessionId());

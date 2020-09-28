@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.LazyCollection;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import javax.persistence.*;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table
 @Data
@@ -37,6 +39,7 @@ public class Comment extends BaseEntity{
     private Task task;
 
     @OneToMany
-    @JoinColumn(name = "file")
-    private List<File> file;
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JoinColumn(name = "comment_id")
+    private List<File> files;
 }

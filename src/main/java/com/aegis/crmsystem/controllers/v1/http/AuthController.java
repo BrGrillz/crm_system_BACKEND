@@ -1,11 +1,10 @@
 package com.aegis.crmsystem.controllers.v1.http;
 
-import com.aegis.crmsystem.Gggg;
+import com.aegis.crmsystem.Auth;
 import com.aegis.crmsystem.constants.SwaggerConst;
 import com.aegis.crmsystem.dto.AuthenticationRequestDto;
 import com.aegis.crmsystem.dto.request.AccessTokenDto;
 import com.aegis.crmsystem.dto.request.RefreshTokenDto;
-import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
 import com.aegis.crmsystem.models.User;
 import com.aegis.crmsystem.security.jwt.JwtTokenProvider;
 import com.aegis.crmsystem.servies.AuthenticationService;
@@ -49,7 +48,11 @@ public class AuthController {
     }
 
     @GetMapping("user")
-    public User getCurrentUser(){
-        return Gggg.user.getUser();
+    public User getCurrentUser(
+            @AuthenticationPrincipal User user
+    ){
+        log.debug("user =============================================== {}", user);
+
+        return Auth.user;
     }
 }

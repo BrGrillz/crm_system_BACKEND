@@ -31,4 +31,6 @@ public class UpdateTaskDto {
 
     @NotNull
     private Long status;
+
+    private List<Long> files;
 }

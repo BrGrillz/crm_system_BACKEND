@@ -1,7 +1,7 @@
 package com.aegis.crmsystem.controllers.v1.http;
 
 
-import com.aegis.crmsystem.Gggg;
+import com.aegis.crmsystem.Auth;
 import com.aegis.crmsystem.constants.SwaggerConst;
 import com.aegis.crmsystem.domain.Views;
 import com.aegis.crmsystem.dto.request.CommentDto;
@@ -37,11 +37,7 @@ public class TaskController {
     @JsonView({Views.Message.class})
     @ApiOperation(value = SwaggerConst.Tasks.GET_ALL_TASKS)
     public List<Task> getAll(@RequestBody(required = false) FilterGetAllTaskDto filterGetAllTaskDto) {
-        if(filterGetAllTaskDto == null){
-            filterGetAllTaskDto = new FilterGetAllTaskDto();
-        }
-
-        return taskService.findAll(Gggg.user.getUser(), filterGetAllTaskDto);
+        return taskService.findAll(Auth.jwtUser.getUser(), filterGetAllTaskDto);
     }
 
     @JsonView({Views.Message.class})
@@ -58,7 +54,7 @@ public class TaskController {
     @PostMapping
     @ApiOperation(value = SwaggerConst.Tasks.CREATE_TASK)
     public Task create(@RequestBody CreateTaskDto createTaskDto) {
-        return taskService.create(createTaskDto, Gggg.user.getUser());
+        return taskService.create(createTaskDto, Auth.jwtUser.getUser());
     }
 
     /**

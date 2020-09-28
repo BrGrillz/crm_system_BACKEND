@@ -1,25 +1,25 @@
 package com.aegis.crmsystem.controllers.v1.ws;
 
-import com.aegis.crmsystem.Gggg;
+import com.aegis.crmsystem.Auth;
 import com.aegis.crmsystem.domain.Views;
 import com.aegis.crmsystem.dto.request.CommentDto;
 import com.aegis.crmsystem.dto.request.task.*;
+import com.aegis.crmsystem.dto.role.RoleDto;
+import com.aegis.crmsystem.exceptions.ApiRequestExceptionNotFound;
 import com.aegis.crmsystem.models.Comment;
 import com.aegis.crmsystem.models.Task;
 import com.aegis.crmsystem.models.TaskStatus;
-import com.aegis.crmsystem.security.jwt.JwtUser;
+import com.aegis.crmsystem.models.User;
 import com.aegis.crmsystem.servies.TaskService;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -29,69 +29,130 @@ public class WSTaskController {
     @Autowired
     private TaskService taskService;
 
-    @MessageMapping("/getAllTask")
-    @SendTo("/task/getAll")
-    @JsonView({Views.Message.class})
-    public List<Task> getAll(@Payload(required = false) FilterGetAllTaskDto filterGetAllTaskDto) {
-        if(filterGetAllTaskDto == null){
-            filterGetAllTaskDto = new FilterGetAllTaskDto();
-        }
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-        return taskService.findAll(Gggg.user.getUser(), filterGetAllTaskDto);
+    @MessageMapping("/getAllTask")
+//    @SendTo("/task/getAll")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @JsonView({Views.Message.class})
+    public void getAll(
+            @Payload(required = false) FilterGetAllTaskDto filterGetAllTaskDto
+    ) {
+        final List<Task> listTasks = taskService.findAll(Auth.jwtUser.getUser(), filterGetAllTaskDto);
+
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "/task/getAll",
+                listTasks
+        );
+
+        throw new ApiRequestExceptionNotFound("Задача по такому id не найден");
     }
 
     @MessageMapping("/getAllStatus")
-    @SendTo("/status/getAll")
     @JsonView({Views.Message.class})
-    public List<TaskStatus> getAllStatus() {
-        return taskService.findAllStatus();
+    public void getAllStatus() {
+        List<TaskStatus> taskStatusList = taskService.findAllStatus();
+
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "/status/getAll",
+                taskStatusList
+        );
     }
 
-    @MessageMapping("/detailsTask")
-    @SendTo("/task/getOne")
+    @MessageMapping("/task/details")
     @JsonView({Views.FullMessage.class})
-    public Task getOne(@Payload DetailsTaskDto detailsTaskDto) {
-        return taskService.getOne(detailsTaskDto, Gggg.user.getUser());
+    public void getDetails(
+            @Payload DetailsTaskDto detailsTaskDto
+    ) {
+        final Task task = taskService.getOne(detailsTaskDto, Auth.jwtUser.getUser());
+
+        simpMessagingTemplate.convertAndSend(
+                "/task/" + detailsTaskDto.getId() + "/details",
+                task
+        );
     }
 
     @MessageMapping("/createTask")
-    @SendTo("/task/create")
     @JsonView({Views.Message.class})
-    public Task create(@Payload CreateTaskDto createTaskDto) {
-        return taskService.create(createTaskDto, Gggg.user.getUser());
+    public void create(@Payload CreateTaskDto createTaskDto) {
+        final Task task = taskService.create(createTaskDto, Auth.jwtUser.getUser());
+
+        taskService.sendToUsers(task, "create");
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "response/task/create/success",
+                task
+        );
     }
 
     @MessageMapping("/updateTask")
-    @SendTo("/task/update")
     @JsonView({Views.Message.class})
-    public Task update(@Payload UpdateTaskDto updateTaskDto) {
-        return taskService.put(updateTaskDto, Gggg.user.getUser());
+    public void update(@Payload UpdateTaskDto updateTaskDto) {
+        final Task task = taskService.put(updateTaskDto, Auth.jwtUser.getUser());
+
+        taskService.sendToUsers(task, "update");
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "response/task/update/success",
+                task
+        );
     }
 
     @MessageMapping("/patchTask")
-    @SendTo("/task/patch")
     @JsonView({Views.Message.class})
-    public Task patch(@Payload(required = false) PatchTaskDto patchTaskDto) {
-        if(patchTaskDto == null){
-            patchTaskDto = new PatchTaskDto();
-        }
+    public void patch(@Payload(required = false) PatchTaskDto patchTaskDto) {
+        final Task task = taskService.patch(patchTaskDto, Auth.jwtUser.getUser());
 
-        return taskService.patch(patchTaskDto, Gggg.user.getUser());
+        taskService.sendToUsers(task, "patch");
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "response/task/patch/success",
+                task
+        );
     }
 
     @MessageMapping("/deleteTask")
-    @SendTo("/task/delete")
     @JsonView({Views.Message.class})
-    public Task delete(@Payload DeleteTaskDto deleteTaskDto) {
-        return taskService.delete(deleteTaskDto);
+    public void delete(@Payload DeleteTaskDto deleteTaskDto) {
+        final Task task = taskService.delete(deleteTaskDto);
+
+        taskService.sendToUsers(task, "delete");
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "response/task/delete/success",
+                task
+        );
     }
 
     @MessageMapping("/makeComment")
-    @SendTo("/task/makeComment")
     @JsonView({Views.Message.class})
-    public Comment makeComment(
+    public void makeComment(
             @Payload CommentDto commentDto
     ) {
-        return taskService.makeComment(commentDto, Gggg.user.getUser());
+        final Comment comment = taskService.makeComment(commentDto, Auth.jwtUser.getUser());
+
+        simpMessagingTemplate.convertAndSend(
+                "/task/" + commentDto.getTaskId() + "/comments",
+                comment
+        );
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "response/task/comment/success",
+                comment
+        );
+
+    }
+
+    @MessageExceptionHandler
+    public void handleException(IllegalArgumentException exception) {
+
+        simpMessagingTemplate.convertAndSendToUser(
+                Auth.jwtUser.getUser().getEmail(),
+                "/task/error",
+                exception.getMessage()
+        );
     }
 }

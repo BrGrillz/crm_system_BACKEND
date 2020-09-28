@@ -1,5 +1,6 @@
 package com.aegis.crmsystem.security.jwt;
 
+import com.aegis.crmsystem.Auth;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionNotFound;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
 import lombok.AllArgsConstructor;
@@ -52,13 +53,13 @@ public class JwtTokenFilter extends GenericFilterBean {
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH");
 
         // Access-Control-Allow-Headers
-        response.setHeader("Access-Control-Allow-Headers",
-                "Origin, X-Requested-With, Content-Type, Accept, " + "X-CSRF-TOKEN");
+//        response.setHeader("Access-Control-Allow-Headers",
+//                "Origin, X-Requested-With, Content-Type, Accept, " + "X-CSRF-TOKEN");
 
 //        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH");
 //        response.setHeader("Access-Control-Max-Age", "3600");
 //        response.setHeader("Access-Control-Allow-Credentials", "true");
-//        response.setHeader("Access-Control-Allow-Headers", "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization");
+        response.setHeader("Access-Control-Allow-Headers", "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization");
 
 
         try {
@@ -69,6 +70,7 @@ public class JwtTokenFilter extends GenericFilterBean {
 
                 if (auth != null) {
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    Auth.jwtUser = (JwtUser) auth.getPrincipal();;
                 }
             }
         } catch (RuntimeException e) {

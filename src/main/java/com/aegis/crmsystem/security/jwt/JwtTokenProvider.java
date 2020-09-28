@@ -56,8 +56,6 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(user.getEmail());
         claims.put("roles", getRoleNames(user.getRoles()));
 
-        log.debug("---------------------------------3----------------------------------------");
-
         Date now = new Date();
         Date validityForAccessToken = new Date(now.getTime() + validityAccessTokenInMilliseconds);
         Date validityForRefreshToken = new Date(now.getTime() + validityRefreshTokenInMilliseconds);
@@ -77,18 +75,11 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretRefreshToken)
                 .compact());
 
-        log.debug("---------------------------------4---------------------------------------- {}", response);
-
         return response;
     }
 
     public Authentication getAuthentication(String token) {
-
-        log.info("+++++___________________________________getUserEmailFromAccessToken(token)______________________________+++++ {}", getUserEmailFromAccessToken(token));
-
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUserEmailFromAccessToken(token));
-
-        log.info("+++++___________________________________userDetails_____1_________________________+++++ {}", userDetails);
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
@@ -119,7 +110,7 @@ public class JwtTokenProvider {
 
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiRequestExceptionBadRequest("access token is invalid1");
+            throw new ApiRequestExceptionBadRequest("access token is invalid");
         }
     }
 
@@ -129,7 +120,7 @@ public class JwtTokenProvider {
 
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiRequestExceptionBadRequest("access token is invalid1");
+            throw new ApiRequestExceptionBadRequest("refresh token is invalid");
         }
     }
 

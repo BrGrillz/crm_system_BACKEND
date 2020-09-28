@@ -1,5 +1,6 @@
 package com.aegis.crmsystem.servies;
 
+import com.aegis.crmsystem.Auth;
 import com.aegis.crmsystem.dto.AuthenticationRequestDto;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionNotFound;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionUnauthorized;
@@ -23,7 +24,7 @@ public class AuthenticationService {
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    private UserService userService;
+    private UsersService userService;
 
     public Map<Object, Object> getNewTokensByRefresh(String token) {
         if(jwtTokenProvider.validateRefreshToken(token)){
@@ -39,19 +40,18 @@ public class AuthenticationService {
     public Map<Object, Object> login(AuthenticationRequestDto requestDto) {
         String email = requestDto.getEmail();
 
-        User user;
-
-        try {
-            user = userService.findByEmail(email);
-        } catch (Exception e){
-            throw new ApiRequestExceptionNotFound("User with email: " + email + " not found");
+        User user = userService.findByEmail(email);
+        if(user == null){
+            throw new ApiRequestExceptionNotFound("Email - Такого адресса электронной почты не существует");
         }
 
-        log.debug("---------------------------------1----------------------------------------");
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, requestDto.getPassword()));
+        } catch (Exception e){
+            throw new ApiRequestExceptionNotFound("Password - Неверный пароль");
+        }
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, requestDto.getPassword()));
-
-        log.debug("---------------------------------2----------------------------------------");
+        Auth.user = user;
 
         return jwtTokenProvider.createTokens(user);
     }

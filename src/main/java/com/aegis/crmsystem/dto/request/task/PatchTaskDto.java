@@ -15,4 +15,5 @@ public class PatchTaskDto {
     private Long responsible;
     private List<Long> observers;
     private Long status;
+    private List<Long> files;
 }

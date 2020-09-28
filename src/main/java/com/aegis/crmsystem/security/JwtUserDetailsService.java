@@ -3,7 +3,7 @@ package com.aegis.crmsystem.security;
 import com.aegis.crmsystem.models.User;
 import com.aegis.crmsystem.security.jwt.JwtUser;
 import com.aegis.crmsystem.security.jwt.JwtUserFactory;
-import com.aegis.crmsystem.servies.UserService;
+import com.aegis.crmsystem.servies.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final UsersService userService;
 
     @Autowired
-    public JwtUserDetailsService(UserService userService) {
+    public JwtUserDetailsService(UsersService userService) {
         this.userService = userService;
     }
 

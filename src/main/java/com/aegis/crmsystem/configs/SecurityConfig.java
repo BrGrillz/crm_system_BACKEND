@@ -70,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                         "/swagger-resources/**",
                         "/configuration/security",
                         "/swagger-ui.html",
-                        "/webjars/**", LOGIN_ENDPOINT).permitAll()
+                        "/webjars/**", LOGIN_ENDPOINT, "/api/v1/files/**").permitAll()
                 .antMatchers(ADMIN_ENDPOINT).hasRole("ADMIN")
                 .antMatchers("/aegis_crm_system/**").permitAll()
                 .anyRequest().authenticated()

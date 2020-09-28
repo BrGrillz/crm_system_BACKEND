@@ -1,0 +1,1 @@
+alter table if exists users add constraint FK_users_files foreign key (avatar) references files

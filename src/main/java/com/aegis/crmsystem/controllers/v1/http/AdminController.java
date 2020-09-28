@@ -6,7 +6,7 @@ import com.aegis.crmsystem.dto.request.users.DeleteUserDto;
 import com.aegis.crmsystem.dto.request.users.PatchUserDto;
 import com.aegis.crmsystem.dto.request.users.PutUserDto;
 import com.aegis.crmsystem.models.User;
-import com.aegis.crmsystem.servies.UserService;
+import com.aegis.crmsystem.servies.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags= SwaggerConst.Admin.API_TITLE)
 public class AdminController {
     @Autowired
-    private UserService userService;
+    private UsersService userService;
 
     @PostMapping("user/create")
     @ApiOperation(value = SwaggerConst.Admin.CREATE_USER)

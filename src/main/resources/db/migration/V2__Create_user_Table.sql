@@ -17,6 +17,7 @@ create table users (
     password varchar(255),
     first_name varchar(255),
     last_name varchar(255),
+    avatar int8,
     last_visit timestamp,
     created_at timestamp,
     updated_at timestamp,

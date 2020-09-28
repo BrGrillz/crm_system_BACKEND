@@ -5,22 +5,21 @@ import com.aegis.crmsystem.dto.request.CommentDto;
 import com.aegis.crmsystem.dto.request.task.*;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionAccessDenied;
 import com.aegis.crmsystem.exceptions.ApiRequestExceptionNotFound;
-import com.aegis.crmsystem.models.Comment;
-import com.aegis.crmsystem.models.Task;
-import com.aegis.crmsystem.models.TaskStatus;
-import com.aegis.crmsystem.models.User;
-import com.aegis.crmsystem.repositories.CommentRepository;
-import com.aegis.crmsystem.repositories.TaskRepository;
-import com.aegis.crmsystem.repositories.TaskStatusRepository;
-import com.aegis.crmsystem.repositories.UserRepository;
+import com.aegis.crmsystem.models.*;
+import com.aegis.crmsystem.repositories.*;
+import com.aegis.crmsystem.specifications.TaskSpecification;
 import com.sun.istack.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -37,6 +36,15 @@ public class TaskService {
     @Autowired
     private TaskStatusRepository taskStatusRepository;
 
+    @Autowired
+    private FileRepository fileRepository;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    private MailService mailService;
+
     public Task create(
             @NotNull CreateTaskDto createTaskDto,
             @NotNull User user
@@ -48,20 +56,30 @@ public class TaskService {
             observersUsers = userRepository.findAllById(createTaskDto.getObservers());
         }
 
-        log.debug("-------------------------------observersUsers--------------------------------------- {}", observersUsers);
+        List<File> files = null;
+        if(createTaskDto.getFiles() != null){
+            files = fileRepository.findAllById(createTaskDto.getFiles());
+        }
 
         TaskStatus taskStatus = taskStatusRepository.findById(1L).get();
 
-        return tasksRepository.save(Task.builder()
+        final Task newTask =  tasksRepository.save(Task.builder()
                 .title(createTaskDto.getTitle())
                 .description(createTaskDto.getDescription())
                 .dueDate(createTaskDto.getDueDate())
                 .status(taskStatus)
                 .author(user)
+                .files(files)
                 .deleteStatus(false)
                 .responsible(responsibleUser)
                 .observers(observersUsers)
                 .build());
+
+        final List<User> listUser = getListOfUsersRelatedTask(newTask);
+
+        listUser.forEach(userOnList -> mailService.sendNewTaskInfo(userOnList, newTask));
+
+        return newTask;
     }
 
     public Task getOne(
@@ -76,38 +94,64 @@ public class TaskService {
         final Long userId = user.getId();
         final Long authorId = task.getAuthor().getId();
         final Long responsibleId = task.getResponsible().getId();
+        final List<User> observers = task.getObservers();
 
-        if(!userId.equals(authorId) && !userId.equals(responsibleId)){
+        if(!userId.equals(authorId) && !userId.equals(responsibleId) && !userEqualsObservers(userId, observers)){
             throw new ApiRequestExceptionAccessDenied("У вас нету доступа для просмотра этой задачи");
         }
 
         return task;
     }
 
+    protected Boolean userEqualsObservers(Long userId, List<User> observers){
+        AtomicReference<Boolean> equals = new AtomicReference<>(false);
+
+        observers.forEach(observer -> {
+            if(userId.equals(observer.getId())){
+                equals.set(true);
+            }
+        });
+
+        return equals.get();
+    }
+
     public List<Task> findAll(User user, FilterGetAllTaskDto filterGetAllTaskDto) {
-        log.info(SwaggerConst.Tasks.GET_ALL_TASKS);
+        final TaskSpecification taskSpecification = new TaskSpecification(filterGetAllTaskDto, user);
+        final List<Task> listTasks = tasksRepository.findAll(taskSpecification);
 
-        List<User> observers = new ArrayList<>();
-        observers.add(user);
+        return  listTasks;
 
-        if(filterGetAllTaskDto.getAuthor() != null){
-            return tasksRepository.findWhereUserAuthor(user);
-        }
-
-        if(filterGetAllTaskDto.getResponsible() != null){
-            return tasksRepository.findWhereUserResponsible(user);
-        }
-
-        if(filterGetAllTaskDto.getObservers() != null){
-            log.debug("==================observers======================= {}", observers);
-            return tasksRepository.findWhereUserObserver(user);
-        }
-
-        if(filterGetAllTaskDto.getDeleted() != null){
-            return tasksRepository.findDeleted();
-        }
-
-        return tasksRepository.findAllByUser(user);
+//        log.info(SwaggerConst.Tasks.GET_ALL_TASKS);
+//
+//        List<Task> listTasks = null;
+//
+//        if(filterGetAllTaskDto.getAuthor() != null){
+//            listTasks = tasksRepository.findWhereUserAuthor(user);
+//        }
+//
+//        if(filterGetAllTaskDto.getResponsible() != null){
+//            listTasks = tasksRepository.findWhereUserResponsible(user);
+//        }
+//
+//        if(filterGetAllTaskDto.getObservers() != null){
+//            listTasks = tasksRepository.findWhereUserObserver(user);
+//        }
+//
+//        if(filterGetAllTaskDto.getDeleted() != null){
+//            listTasks = tasksRepository.findDeleted();
+//        }
+//
+//        if(listTasks == null){
+//            listTasks = tasksRepository.findAllByUser(user);
+//        }
+//
+//        if(filterGetAllTaskDto.getFilterByStatus() != null){
+//            final TaskStatus status = taskStatusRepository.findById(filterGetAllTaskDto.getFilterByStatus()).get();
+//
+//            tasksRepository.filterByStatus
+//        }
+//
+//        return tasksRepository.findAllByUser(user);
     }
 
     public List<TaskStatus> findAllStatus() {
@@ -134,8 +178,10 @@ public class TaskService {
         final User userResponsible = userRepository.findById(updateTaskDto.getResponsible()).get();
         final TaskStatus status = taskStatusRepository.findById(updateTaskDto.getStatus()).get();
 
-
-        log.debug("===========updateTaskDto.getDueDate()================== {}", updateTaskDto.getDueDate());
+        List<File> listFiles = null;
+        if(updateTaskDto.getFiles() != null){
+            listFiles = this.fileRepository.findAllById(updateTaskDto.getFiles());
+        }
 
         task.setTitle(updateTaskDto.getTitle());
         task.setDescription(updateTaskDto.getDescription());
@@ -143,6 +189,7 @@ public class TaskService {
         task.setObservers(userObservers);
         task.setDueDate(updateTaskDto.getDueDate());
         task.setStatus(status);
+        task.setFiles(listFiles);
 
         return tasksRepository.save(task);
     }
@@ -193,6 +240,11 @@ public class TaskService {
             task.setStatus(status);
         }
 
+        if(patchTaskDto.getFiles() != null){
+            List<File> listFiles = this.fileRepository.findAllById(patchTaskDto.getFiles());
+            task.setFiles(listFiles);
+        }
+
         return tasksRepository.save(task);
     }
 
@@ -212,12 +264,56 @@ public class TaskService {
             @NotNull CommentDto commentDto,
             @NotNull User user
     ) {
-        Task task = tasksRepository.findById(commentDto.getTaskId()).get();
+        final Task task = tasksRepository.findById(commentDto.getTaskId()).get();
+        List<File> files = null;
+        
+        if(commentDto.getFiles() != null){
+            files = fileRepository.findAllById(commentDto.getFiles());
+        }
+        log.debug("commentDto ================================ {}", commentDto);
 
         return commentRepository.save(Comment.builder()
                 .text(commentDto.getText())
                 .author(user)
+                .files(files)
                 .task(task)
                 .build());
+    }
+
+    public void sendToUsers(Task task, String prefix){
+        final List<User> users = getListOfUsersRelatedTask(task);
+
+        users.forEach(user -> simpMessagingTemplate.convertAndSendToUser(
+                user.getEmail(),"/task/" + prefix,
+                task
+        ));
+    }
+
+    public List<User> getListOfUsersRelatedTask(Task task){
+        List<User> observers = task.getObservers();
+        List<User> sendToUsers = Stream.concat(observers.stream(), new ArrayList<User>().stream())
+                .collect(Collectors.toList());
+
+        if(!userInUserList(sendToUsers, task.getAuthor())){
+            sendToUsers.add(task.getAuthor());
+        }
+
+        if(!userInUserList(sendToUsers, task.getResponsible())){
+            sendToUsers.add(task.getResponsible());
+        }
+
+        return sendToUsers;
+    }
+
+    protected Boolean userInUserList(List<User> users, User searchUser){
+        AtomicReference<Boolean> checker = new AtomicReference<>(false);
+
+        users.forEach((user) -> {
+            if(user.getId().equals(searchUser.getId())){
+                checker.set(true);
+            }
+        });
+
+        return checker.get();
     }
 }
