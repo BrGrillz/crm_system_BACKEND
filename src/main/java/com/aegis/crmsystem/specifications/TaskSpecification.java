@@ -28,38 +28,34 @@ public class TaskSpecification implements Specification<Task> {
     public Predicate toPredicate(Root<Task> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if(filterGetAllTaskDto == null || filterGetAllTaskDto.isEmpty()){
-            whereUserParticipant(predicates, criteriaBuilder, root);
-        } else {
-            if(filterGetAllTaskDto.getAuthor() != null && filterGetAllTaskDto.getAuthor()) {
-                predicates.add(criteriaBuilder.equal(root.get("author"), user));
-            }
+        whereUserParticipant(predicates, criteriaBuilder, root);
 
-            if(filterGetAllTaskDto.getResponsible() != null && filterGetAllTaskDto.getResponsible()) {
-                predicates.add(criteriaBuilder.equal(root.get("responsible"), user));
-            }
+        if(filterGetAllTaskDto.getAuthor() != null && filterGetAllTaskDto.getAuthor()) {
+            predicates.add(criteriaBuilder.equal(root.get("author"), user));
+        }
 
-            if(filterGetAllTaskDto.getObservers() != null && filterGetAllTaskDto.getObservers()) {
-                final ListJoin<Task, User> userListJoin = root.joinList("observers", JoinType.INNER);
-                predicates.add(criteriaBuilder.equal(userListJoin, user));
-            }
+        if(filterGetAllTaskDto.getResponsible() != null && filterGetAllTaskDto.getResponsible()) {
+            predicates.add(criteriaBuilder.equal(root.get("responsible"), user));
+        }
 
-            if(filterGetAllTaskDto.getDeleted() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("deleteStatus"), filterGetAllTaskDto.getDeleted()));
-            }
+        if(filterGetAllTaskDto.getObservers() != null && filterGetAllTaskDto.getObservers()) {
+            final ListJoin<Task, User> userListJoin = root.joinList("observers", JoinType.INNER);
+            predicates.add(criteriaBuilder.equal(userListJoin, user));
+        }
 
-            if(filterGetAllTaskDto.getStatus() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("status").get("id"), filterGetAllTaskDto.getStatus()));
-                whereUserParticipant(predicates, criteriaBuilder, root);
-            }
+        if(filterGetAllTaskDto.getDeleted() != null) {
+            predicates.add(criteriaBuilder.equal(root.get("deleteStatus"), filterGetAllTaskDto.getDeleted()));
+        }
 
-            if(filterGetAllTaskDto.getSearch() != null) {
-                predicates.add(criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.<String>get("title")), "%" + filterGetAllTaskDto.getSearch().toLowerCase() + "%"),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.<String>get("description")), "%" + filterGetAllTaskDto.getSearch().toLowerCase() + "%")
-                ));
-                whereUserParticipant(predicates, criteriaBuilder, root);
-            }
+        if(filterGetAllTaskDto.getStatus() != null) {
+            predicates.add(criteriaBuilder.equal(root.get("status").get("id"), filterGetAllTaskDto.getStatus()));
+        }
+
+        if(filterGetAllTaskDto.getSearch() != null) {
+            predicates.add(criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.<String>get("title")), "%" + filterGetAllTaskDto.getSearch().toLowerCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.<String>get("description")), "%" + filterGetAllTaskDto.getSearch().toLowerCase() + "%")
+            ));
         }
 
         return query.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])))
